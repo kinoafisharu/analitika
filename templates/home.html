@@ -10,6 +10,14 @@
     <form method="post" action="" enctype="multipart/form-data">{% csrf_token %}
     <div class="form-group">
             <input type="file" name="file">
+        <p>
+        <label for="file_format_select">Тип файла: </label>
+            <select name="file_format" id="file_format_select">
+                <optgroup label="Формат">
+                <option value="xml" class="option" name="format">xml</option>
+                <option value="json" class="option" name="format">json</option>
+            </select>
+        </p>
         <button type="submit" class="btn btn-primary">Загрузить файл</button>
     </div>
     </form>

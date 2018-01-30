@@ -11,11 +11,15 @@ def home(request):
     if request.POST:
         try:
             file = request.FILES['file']
-            uploading_file = UploadingProducts({'file': file})
-            if uploading_file:
-                messages.success(request, "Загружено")
+            format_file = request.POST["file_format"]
+            if file.name.split(".")[-1].lower() != format_file:
+                messages.error(request, "Формат файла не подходит!")
             else:
-                messages.error(request, "Ошибка")
+                uploading_file = UploadingProducts({'file': file, 'format_file': format_file})
+                if uploading_file:
+                    messages.success(request, "Загружено")
+                else:
+                    messages.error(request, "Ошибка")
         except MultiValueDictKeyError:
             messages.error(request, "Выберите файл!")
     return render(request, 'home.html', locals())
