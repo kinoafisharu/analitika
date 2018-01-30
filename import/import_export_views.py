@@ -39,7 +39,7 @@ class UploadingProducts(object):
 
     def parsing(self):
         uploaded_file = self.uploaded_file
-        if self.format_file == 'xml':
+        if self.format_file == 'xls' or self.format_file == 'xlsx':
             wb = xlrd.open_workbook(file_contents=uploaded_file.read())
             s = wb.sheet_by_index(0)
             self.s = s
