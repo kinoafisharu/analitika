@@ -6,6 +6,7 @@ import django
 from django.shortcuts import get_object_or_404, HttpResponse
 from django.contrib import messages
 from django.core.exceptions import MultipleObjectsReturned
+from django.db import IntegrityError
 os.environ['DJANGO_SETTINGS_MODULE'] = 'untitled1.settings'
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 django.setup()
@@ -29,7 +30,7 @@ class UploadingProducts(object):
         s = self.s
         headers = dict()
         for column in range(s.ncols):
-            value = s.cell(0,column).value
+            value = s.cell(0, column).value
             headers[column] = value
         return headers
 
@@ -56,10 +57,11 @@ class UploadingProducts(object):
                     instance = get_object_or_404(related_model, tag_title=value)
                     value = instance
                 row_dict[field_name] = value
-            product_bulk_list.append(Offers(**row_dict))
+            # product_bulk_list.append(Offers(**row_dict))
+            Offers.objects.update_or_create(**row_dict)
             key = row_dict["slug"]
             sub_bulk_list.append(key)
-        Offers.objects.bulk_create(product_bulk_list)
+        # Offers.objects.bulk_create(product_bulk_list)
         for row in range(1, s.nrows):
             sub_dict = []
             for column in range(s.ncols):
@@ -82,8 +84,8 @@ class UploadingProducts(object):
                             ThroughModel(offers_id=get_object_or_404(Offers, slug=sub_bulk_list[i]).id,
                                          subtags_id=get_object_or_404(Subtags, tag_title=sub_key_bulk_list[i][j]).id),
                         ])
-                    except MultipleObjectsReturned:
-                        pass
+                    except (MultipleObjectsReturned, IntegrityError):
+                        continue
                 except IndexError:
                     continue
         return True
