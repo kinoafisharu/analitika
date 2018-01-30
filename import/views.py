@@ -8,6 +8,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 
 def home(request):
     offers = Offers.objects.all()
+    field = [f.name for f in Offers._meta.get_fields()]
     if request.POST:
         try:
             file = request.FILES['file']
