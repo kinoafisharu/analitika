@@ -29,6 +29,7 @@ class OfferResource(resources.ModelResource):
 
     class Meta:
         model = Offers
+        exclude = ["id"]
         import_id_fields = ['slug']
         fields = ('offer_title', 'slug', 'offer_price', 'dimension', 'offer_tag', 'offer_sub_tag')
 
