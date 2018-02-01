@@ -4,8 +4,7 @@ from .models import *
 import xlrd
 import django
 import json
-from django.shortcuts import get_object_or_404, HttpResponse
-from django.contrib import messages
+from django.shortcuts import get_object_or_404
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import IntegrityError
 from django.template.defaultfilters import slugify
@@ -48,6 +47,7 @@ class UploadingProducts(object):
             product_bulk_list = list()
             sub_bulk_list = []
             sub_key_bulk_list = []
+            sub_bulk_cat_list = []
             for row in range(1, s.nrows):
                 row_dict = {}
                 for column in range(s.ncols):
@@ -62,7 +62,7 @@ class UploadingProducts(object):
                         try:
                             instance = related_model.objects.get(tag_title=value)
                         except ObjectDoesNotExist:
-                            instance = related_model.objects.create(tag_url=slugify(unidecode(value)), tag_title=value,
+                            related_model.objects.create(tag_url=slugify(unidecode(value)), tag_title=value,
                                                                     tag_publish=True, tag_priority=1)
                             instance = related_model.objects.get(tag_title=value)
                         value = instance
@@ -70,19 +70,29 @@ class UploadingProducts(object):
                 # product_bulk_list.append(Offers(**row_dict))
                 Offers.objects.update_or_create(**row_dict)
                 key = row_dict["slug"]
+                sub_bulk_cat = row_dict["offer_tag"]
+                sub_bulk_cat_list.append(sub_bulk_cat)
                 sub_bulk_list.append(key)
             # Offers.objects.bulk_create(product_bulk_list)
             for row in range(1, s.nrows):
                 sub_dict = []
+                sub_tag_list = []
                 for column in range(s.ncols):
                     value = s.cell(row, column).value
                     field_name = headers[column]
                     if field_name in "offer_sub_tag":
-                        a = [i for i in value.split(", ")]
-                        for i in range(0, len(a)):
-                            instance = get_object_or_404(Subtags, tag_title=a[i])
-                            value = instance
-                            sub_dict.append(value)
+                        for st in range(len(sub_bulk_cat_list)):
+                            a = [v for v in value.split(", ")]
+                            sub_tag_list.append(a)
+                            for i in range(len(sub_tag_list[st])):
+                                try:
+                                    instance = Subtags.objects.get(tag_title=a[i])
+                                except ObjectDoesNotExist:
+                                    Subtags.objects.create(tag_url=slugify(unidecode(a[i])), tag_title=a[i],
+                                                           tag_parent_tag=sub_bulk_cat_list[st])
+                                    instance = get_object_or_404(Subtags, tag_title=a[i])
+                                value_sub = instance
+                                sub_dict.append(value_sub)
                         sub_key_bulk_list.append(sub_dict)
             ThroughModel = Offers.offer_sub_tag.through
             for i in range(len(sub_bulk_list)):
@@ -109,8 +119,12 @@ class UploadingProducts(object):
                     d["slug"] = x[i]["slug"]
                     d["offer_price"] = x[i]["offer_price"]
                     d["dimension"] = x[i]["dimension"]
-                    if Tags.objects.get(tag_title=x[i]["offer_tag"]):
+                    try:
                         d["offer_tag"] = Tags.objects.get(tag_title=x[i]["offer_tag"])
+                    except ObjectDoesNotExist:
+                        Tags.objects.create(tag_url=slugify(unidecode(x[i]["offer_tag"])), tag_title=x[i]["offer_tag"],
+                                            tag_publish=True, tag_priority=1)
+                        d["offer_tag"] = get_object_or_404(Tags, tag_title=x[i]["offer_tag"])
                     js.append(d)
                     Offers.objects.update_or_create(**d)
                 except KeyError:
@@ -118,13 +132,20 @@ class UploadingProducts(object):
             for k in range(len(x)):
                 try:
                     for j in range(len(x[k]["offer_sub_tag"].split(", "))):
-                        v = Subtags.objects.get(tag_title=x[k]["offer_sub_tag"].split(", ")[j])
+                        try:
+                            v = Subtags.objects.get(tag_title=x[k]["offer_sub_tag"].split(", ")[j])
+                            print(v)
+                        except ObjectDoesNotExist:
+                            Subtags.objects.create(tag_url=slugify(unidecode(x[k]["offer_sub_tag"].split(", ")[j])),
+                                                   tag_title=x[k]["offer_sub_tag"].split(", ")[j],
+                                                   tag_parent_tag=Tags.objects.get(tag_title=x[k]["offer_tag"]))
+                            v = get_object_or_404(Subtags, tag_title=x[k]["offer_sub_tag"].split(", ")[j])
                         try:
                             ThroughModel.objects.bulk_create([
                                 ThroughModel(offers_id=get_object_or_404(Offers, slug=x[k]["slug"]).id,
                                              subtags_id=get_object_or_404(Subtags, tag_title__icontains=v).id),
                             ])
-                        except IntegrityError:
+                        except (MultipleObjectsReturned, IntegrityError):
                             continue
                 except KeyError:
                     continue
