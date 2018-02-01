@@ -22,7 +22,6 @@ class UploadingProducts(object):
         data = data
         self.uploaded_file = data.get("file")
         self.format_file = data.get("format_file")
-        print(self.format_file)
         self.parsing()
 
     def getting_related_model(self, field_name):
@@ -72,7 +71,7 @@ class UploadingProducts(object):
                     value = s.cell(row, column).value
                     field_name = headers[column]
                     if field_name in "offer_sub_tag":
-                        a = [i for i in value.split(",")]
+                        a = [i for i in value.split(", ")]
                         for i in range(0, len(a)):
                             instance = get_object_or_404(Subtags, tag_title=a[i])
                             value = instance
