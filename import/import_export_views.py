@@ -6,8 +6,10 @@ import django
 import json
 from django.shortcuts import get_object_or_404, HttpResponse
 from django.contrib import messages
-from django.core.exceptions import MultipleObjectsReturned
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import IntegrityError
+from django.template.defaultfilters import slugify
+from unidecode import unidecode
 os.environ['DJANGO_SETTINGS_MODULE'] = 'untitled1.settings'
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 django.setup()
@@ -57,7 +59,12 @@ class UploadingProducts(object):
                         continue
                     if field_name in self.foreign_key_field:
                         related_model = self.getting_related_model(field_name)
-                        instance = get_object_or_404(related_model, tag_title=value)
+                        try:
+                            instance = related_model.objects.get(tag_title=value)
+                        except ObjectDoesNotExist:
+                            instance = related_model.objects.create(tag_url=slugify(unidecode(value)), tag_title=value,
+                                                                    tag_publish=True, tag_priority=1)
+                            instance = related_model.objects.get(tag_title=value)
                         value = instance
                     row_dict[field_name] = value
                 # product_bulk_list.append(Offers(**row_dict))
