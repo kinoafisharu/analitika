@@ -78,10 +78,9 @@ class UploadingProducts(object):
                             value = instance
                             sub_dict.append(value)
                         sub_key_bulk_list.append(sub_dict)
-            print(sub_key_bulk_list)
             ThroughModel = Offers.offer_sub_tag.through
             for i in range(len(sub_bulk_list)):
-                for j in range(len(sub_bulk_list)):
+                for j in range(len(sub_key_bulk_list[i])):
                     try:
                         try:
                             ThroughModel.objects.bulk_create([
@@ -99,7 +98,6 @@ class UploadingProducts(object):
             ThroughModel = Offers.offer_sub_tag.through
             for i in range(len(x)):
                 d = dict()
-                ls = []
                 try:
                     d["offer_title"] = x[i]["offer_title"]
                     d["slug"] = x[i]["slug"]
@@ -114,14 +112,14 @@ class UploadingProducts(object):
             for k in range(len(x)):
                 try:
                     for j in range(len(x[k]["offer_sub_tag"].split(", "))):
-                           v = Subtags.objects.get(tag_title=x[k]["offer_sub_tag"].split(", ")[j])
-                           try:
-                               ThroughModel.objects.bulk_create([
-                                    ThroughModel(offers_id=get_object_or_404(Offers, slug=x[k]["slug"]).id,
-                                                 subtags_id=get_object_or_404(Subtags, tag_title__icontains=v).id),
-                               ])
-                           except IntegrityError:
-                               continue
+                        v = Subtags.objects.get(tag_title=x[k]["offer_sub_tag"].split(", ")[j])
+                        try:
+                            ThroughModel.objects.bulk_create([
+                                ThroughModel(offers_id=get_object_or_404(Offers, slug=x[k]["slug"]).id,
+                                             subtags_id=get_object_or_404(Subtags, tag_title__icontains=v).id),
+                            ])
+                        except IntegrityError:
+                            continue
                 except KeyError:
                     continue
             return True
