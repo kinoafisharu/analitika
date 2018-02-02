@@ -11,3 +11,4 @@ psycopg2==2.7.1
 whitenoise==3.2
 django-import-export==0.7.0
 unidecode
+requests
