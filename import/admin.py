@@ -49,7 +49,6 @@ class JSON(_JSON):
 class OfferAdmin(ImportExportModelAdmin):
     search_fields = ('offer_title', )
     list_display = ('offer_title',)
-    prepopulated_fields = {'slug': ('offer_title',)}
     #Подключаем нужные настройки для импорта и экспорта.
     resource_class = OfferResource
 
@@ -63,4 +62,6 @@ class OfferAdmin(ImportExportModelAdmin):
 
 admin.site.register(Offers, OfferAdmin)
 admin.site.register(Subtags)
+admin.site.register(Availability)
+admin.site.register(Publish)
 admin.site.register(Tags)

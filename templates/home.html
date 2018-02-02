@@ -24,8 +24,15 @@
                         </optgroup>
                     </select>
                 </p>
-                <button type="submit" class="btn btn-primary">Загрузить файл</button>
             </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Загрузить файл</button>
+                </div>
+            </form>
+            <form method="post">{% csrf_token %}
+                <div class="text-right">
+                    <button type="submit" class="btn btn-primary" name="upload">Загрузить фото</button>
+                </div>
             </form>
             <p style="margin-top: 10px">
                 Доступные поля:
@@ -44,22 +51,44 @@
             <thead>
                     <tr>
                         <th>Название</th>
-                        <th>Ссылка</th>
                         <th>Цена</th>
-                        <th>Величина</th>
-                        <th>Категория</th>
-                        <th>Подкатегория</th>
+                        <th>Валюта</th>
+                        <th>Единица измерения</th>
+                        <th>Минимальный размер заказа</th>
+                        <th>Единица измерения минимального заказа</th>
+                        <th>Краткое описание</th>
+                        <th>Описание</th>
+                        <th>Наличие</th>
+                        <th>Публикуемость</th>
+                        <th>Ссылка</th>
+                        <th>Фото на страницу</th>
+                        <th>Ссылка на картинку</th>
+                        <th>Группа 1 уровня</th>
+                        <th>Группа 2 уровня</th>
                     </tr>
                 </thead>
             <tbody>
                 {% for offer in offers %}
                     <tr>
                         <td>{{ offer.offer_title }}</td>
-                        <td>{{ offer.slug }}</td>
                         <td>{{ offer.offer_price }}</td>
-                        <td>{{ offer.dimension }}</td>
+                        <td>{{ offer.offer_valuta }}</td>
+                        <td>{{ offer.offer_value }}</td>
+                        <td>{{ offer.offer_minorder }}</td>
+                        <td>{{ offer.offer_minorder_value }}</td>
+                        <td>{{ offer.offer_pre_text }}</td>
+                        <td>{{ offer.offer_text }}</td>
+                        <td>{{ offer.offer_availability }}</td>
+                        <td>{{ offer.offer_publish }}</td>
+                        <td>{{ offer.offer_url }}</td>
+                    {% if  offer.offer_photo %}
+                        <td>{{ offer.offer_photo.url }}</td>
+                    {% else %}
+                        <td>None</td>
+                    {% endif %}
+                        <td>{{ offer.offer_image_url }}</td>
                         <td>{{ offer.offer_tag }}</td>
-                        <td>{% for title in offer.offer_sub_tag.all %}
+                        <td>{% for title in offer.offer_subtags.all %}
                             {{ title }},
                             {% endfor %}
                             </td>
