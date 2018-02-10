@@ -125,18 +125,22 @@ class UploadingProducts(object):
             js = []
             ThroughModel = Offers.offer_subtags.through
             for i in range(len(x)):
-                d = dict()
                 try:
+                    d = dict()
                     d["offer_title"] = x[i]["offer_title"]
                     d["offer_url"] = x[i]["offer_url"]
-                    d["offer_price"] = x[i]["offer_price"]
+                    d["offer_price"] = x[i]["offer_price"].replace(",", ".")
                     d["offer_valuta"] = x[i]["offer_valuta"]
                     d["offer_value"] = x[i]["offer_value"]
                     d["offer_minorder"] = x[i]["offer_minorder"]
                     d["offer_minorder_value"] = x[i]["offer_minorder_value"]
                     d["offer_pre_text"] = x[i]["offer_pre_text"]
                     d["offer_text"] = x[i]["offer_text"]
-                    d["offer_image_url"] = x[i]["offer_image_url"] if x[i]["offer_image_url"] else x[i]["image_link"]
+                    try:
+                        d["offer_image_url"] = x[i]["offer_image_url"]
+                    except KeyError:
+                        d["offer_image_url"] = x[i]["image_link"]
+                    print(d["offer_image_url"])
                     d["offer_availability"], created = Availability.objects.get_or_create(availability_title=x[i]["offer_availability"])
                     d["offer_publish"], created = Publish.objects.get_or_create(publish_title=x[i]["offer_publish"])
                     try:
@@ -148,7 +152,7 @@ class UploadingProducts(object):
                     js.append(d)
                     Offers.objects.update_or_create(**d)
                 except KeyError:
-                    continue
+                    pass
             for k in range(len(x)):
                 try:
                     for j in range(len(x[k]["offer_subtags"].split(", "))):

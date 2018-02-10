@@ -68,7 +68,7 @@ class Offers(models.Model):
     offer_minorder = models.IntegerField(default=1, verbose_name='Минимальный размер заказа')
     offer_minorder_value = models.CharField(max_length=50, blank=True, verbose_name='Единица измерения минимального заказа')   # Еденица измерения товара
     offer_pre_text = models.TextField(blank=True, null=True, verbose_name='Краткое описание', default=None)                                  # Текст описания товара
-    offer_text = models.TextField(verbose_name='Полное описание', default=None)                                      # Текст описания товара
+    offer_text = models.TextField(verbose_name='Полное описание', default=None, null=True)                                      # Текст описания товара
     offer_availability = models.ForeignKey(Availability, verbose_name='Наличие', default=None)
     offer_publish = models.ForeignKey(Publish, verbose_name='Публикуемость', default=None)
     offer_photo = models.ImageField(blank=True, null=True, verbose_name='Фото на страницу')
