@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 import requests
 
 def home(request):
-    offers = Offers.objects.all()
+    offers = Offers.objects.all().order_by("created")
     field = [f.name for f in Offers._meta.get_fields()]
     if request.POST:
         if "upload" in request.POST:
