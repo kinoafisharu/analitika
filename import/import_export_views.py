@@ -25,7 +25,6 @@ class UploadingProducts(object):
         data = data
         self.uploaded_file = data.get("file")
         self.format_file = data.get("format_file")
-        self.parsing()
 
     def getting_related_model(self, field_name):
         related_model = self.model._meta.get_field(field_name).rel.to
@@ -123,10 +122,11 @@ class UploadingProducts(object):
         elif self.format_file == 'json':
             x = json.loads(uploaded_file.read())
             js = []
+            err = []
             ThroughModel = Offers.offer_subtags.through
             for i in range(len(x)):
+                d = dict()
                 try:
-                    d = dict()
                     d["offer_title"] = x[i]["offer_title"]
                     d["offer_url"] = x[i]["offer_url"]
                     d["offer_price"] = x[i]["offer_price"].replace(",", ".")
@@ -140,19 +140,20 @@ class UploadingProducts(object):
                         d["offer_image_url"] = x[i]["offer_image_url"]
                     except KeyError:
                         d["offer_image_url"] = x[i]["image_link"]
-                    print(d["offer_image_url"])
-                    d["offer_availability"], created = Availability.objects.get_or_create(availability_title=x[i]["offer_availability"])
+                    d["offer_availability"], created = Availability.objects.get_or_create(
+                        availability_title=x[i]["offer_availability"])
                     d["offer_publish"], created = Publish.objects.get_or_create(publish_title=x[i]["offer_publish"])
                     try:
                         d["offer_tag"] = Tags.objects.get(tag_title=x[i]["offer_tag"])
                     except ObjectDoesNotExist:
-                        Tags.objects.create(tag_url=slugify(unidecode(x[i]["offer_tag"])), tag_title=x[i]["offer_tag"],
+                        Tags.objects.create(tag_url=slugify(unidecode(x[i]["offer_tag"])),
+                                            tag_title=x[i]["offer_tag"],
                                             tag_publish=True, tag_priority=1)
                         d["offer_tag"] = get_object_or_404(Tags, tag_title=x[i]["offer_tag"])
                     js.append(d)
                     Offers.objects.update_or_create(**d)
                 except KeyError:
-                    pass
+                    return False
             for k in range(len(x)):
                 try:
                     for j in range(len(x[k]["offer_subtags"].split(", "))):
