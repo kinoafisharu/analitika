@@ -37,7 +37,8 @@ def home(request):
                 else:
                     uploading_file = UploadingProducts({'file': file, 'format_file': format_file})
                     if uploading_file.parsing():
-                        messages.success(request, "Загружено и обновлено")
+                        messages.success(request, "Загружено и обновлено. {}".format(
+                            uploading_file.add if uploading_file.add else ""))
                     else:
                         messages.error(request, "Ошибка. Нет поля: {}".format(uploading_file.err))
             except MultiValueDictKeyError:
